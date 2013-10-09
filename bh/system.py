@@ -36,6 +36,296 @@ def python():
     run('easy_install -U pip')
     run('pip install ipython')
 
+def bin_installed(what):
+    with settings(hide('warnings', 'running', 'stdout', 'stderr'), warn_only=True):
+        out = run('which {}'.format(what))
+        return out.startswith('{base}/bin/{what}'.format(base=env.base, what=what))
+
+def gem_installed(what):
+    with settings(hide('warnings', 'running', 'stdout', 'stderr'), warn_only=True):
+        out = run('gem list {} -i'.format(what))
+        return out == 'true'
+
+@task
+def cmake():
+    setup_env_for_user(env.user)
+    if bin_installed('cmake'):
+        print "cmake already installed"
+        return
+    run('mkdir -p {admin_home_dir}/~build'.format(**env))
+    env.CMAKE = 'cmake-2.8.11.2'
+    with cd(env.build):
+        if not exists('{packages_cache}/{CMAKE}.tar.gz'.format(**env)):
+            run('wget http://www.cmake.org/files/v2.8/{CMAKE}.tar.gz -P {packages_cache}/'.format(**env))
+        run('tar -xzf {packages_cache}/{CMAKE}.tar.gz'.format(**env))
+        with cd(env.CMAKE):
+            run('./bootstrap '
+                ' --prefix={base}'
+                ' --datadir={base}/share/CMake'
+                ' --docdir={base}/doc/CMake'
+                ' --mandir={base}/man'
+                ''.format(**env))
+            run('make clean')
+            run('make')
+            run('make install')
+        run('rm -fr {CMAKE}'.format(**env))
+
+@task
+def mysql():
+    """
+    compile and install mysql
+    """
+    setup_env_for_user(env.user)
+    # if bin_installed('mysql'):
+    #     print "mysql already installed"
+    #     return
+    # if not bin_installed('cmake'):
+    #     execute(cmake)
+    # run('mkdir -p {admin_home_dir}/~build'.format(**env))
+    # env.MYSQL = 'mysql-5.7.2-m12'
+    # with cd(env.build):
+    #     if not exists('{packages_cache}/{MYSQL}.tar.gz'.format(**env)):
+    #         run('wget http://mysql.mirror.facebook.net/MySQL-5.7/{MYSQL}.tar.gz -P {packages_cache}'.format(**env))
+    #     run('tar -xzf {packages_cache}/{MYSQL}.tar.gz'.format(**env))
+    #     with cd(env.MYSQL):
+    #         run('mkdir -p {base}/var/lib')
+    #         run('cmake '
+    #             ' -DCMAKE_INSTALL_PREFIX={base}'
+    #             ' -DMYSQL_UNIX_ADDR={base}/tmp/mysql.sock'
+    #             ' -DMYSQL_DATADIR={base}/var/lib/mysql'
+    #             ' .'
+    #             ''.format(**env))
+    #         run('make clean')
+    #         run('make')
+    #         run('make install')
+    #     run('rm -fr {MYSQL}'.format(**env))
+    # if bin_installed('ruby'):
+    #     run('gem install mysql2')
+    # run('{base}/scripts/mysql_install_db '
+    #     ' --user={user} '
+    #     ' --random-passwords'
+    #     ' --force'
+    #     ' --basedir={base}'
+    #     ' --skip-name-resolve'
+    #     ''.format(**env))
+    # run('echo \'basedir={base}\' >> {base}/my.cnf'.format(**env))
+    # run('echo \'datadir={base}/var/lib/mysql\' >> {base}/my.cnf'.format(**env))
+    run('echo \'port={env.MYSQL_PORT}\' >> {base}/my.cnf'.format(**env))
+#    run('cd {base}/mysql-test ; perl mysql-test-run.pl'.format(**env))
+
+
+@task
+def ruby():
+    """
+    compile and install ruby
+    """
+    setup_env_for_user(env.user)
+    if bin_installed('ruby'):
+        print "ruby already installed"
+        return
+    run('mkdir -p {admin_home_dir}/~build'.format(**env))
+    env.RUBY = 'ruby-2.0.0-p247'
+    with cd(env.build):
+        if not exists('{packages_cache}/{RUBY}.tar.gz'.format(**env)):
+            run('wget http://cache.ruby-lang.org/pub/ruby/2.0/{RUBY}.tar.gz -P {packages_cache}'.format(**env))
+        run('tar -xzf {packages_cache}/{RUBY}.tar.gz'.format(**env))
+        with cd(env.RUBY):
+            run('./configure '
+                ' --prefix={base}'
+                ' --exec_prefix={base}'
+                ' --bindir={base}/bin'
+                ' --sbindir={base}/bin'
+                ' --libexecdir={base}/lib/ruby'
+                ' --mandir={base}/man'
+                ' --sysconfdir={base}/etc/httpd/conf'
+                ' --datadir={base}/var/www'
+                ' --includedir={base}/lib/include/ruby'
+                ' --localstatedir={base}/var/run'
+                ''.format(**env))
+            run('make clean')
+            run('make')
+            run('make install')
+        run('rm -fr {RUBY}'.format(**env))
+    if bin_installed('mysql'):
+        run('gem install mysql2')
+
+
+@task
+def imagemagick():
+    """
+    compile and install imagemagick
+    """
+    setup_env_for_user(env.user)
+    if bin_installed('animate'):
+        print "imagemagick already installed"
+        return
+    run('mkdir -p {admin_home_dir}/~build'.format(**env))
+    env.IMAGEMAGICK = 'ImageMagick-6.8.7-0'
+    with cd(env.build):
+        if not exists('{packages_cache}/{IMAGEMAGICK}.tar.gz'.format(**env)):
+            run('wget http://www.imagemagick.org/download/{IMAGEMAGICK}.tar.gz -P {packages_cache}'.format(**env))
+        run('tar -xzf {packages_cache}/{IMAGEMAGICK}.tar.gz'.format(**env))
+        with cd(env.IMAGEMAGICK):
+            run('./configure '
+                ' --prefix={base}'
+                ' --exec_prefix={base}'
+                ''.format(**env))
+            run('make clean')
+            run('make')
+            run('make install')
+        run('rm -fr {IMAGEMAGICK}'.format(**env))
+
+@task
+def curl():
+    setup_env_for_user(env.user)
+    if bin_installed('curl'):
+        print "curl already installed"
+        return
+    run('mkdir -p {admin_home_dir}/~build'.format(**env))
+    env.CURL = 'curl-7.32.0'
+    with cd(env.build):
+        if not exists('{packages_cache}/{CURL}.tar.gz'.format(**env)):
+            run('wget http://curl.haxx.se/download/{CURL}.tar.gz -P {packages_cache}'.format(**env))
+        run('tar -xzf {packages_cache}/{CURL}.tar.gz'.format(**env))
+        with cd(env.CURL):
+            run('./configure '
+                ' --prefix={base}'
+                ' --exec_prefix={base}'
+                ''.format(**env))
+            run('make clean')
+            run('make')
+            run('make install')
+        run('rm -fr {CURL}'.format(**env))
+
+@task
+def redmine(mysql_port, http_port):
+    setup_env_for_user(env.user)
+    if not bin_installed('apachectl'):
+        execute(apache)
+    if not bin_installed('animate'):
+        execute(imagemagick)
+    if not bin_installed('ruby'):
+        execute(ruby)
+    if not gem_installed('rails'):
+        run('gem install rails')
+    if not gem_installed('bundler'):
+        run('gem install bundler')
+    if not bin_installed('mysql'):
+        execute(mysql)
+    with settings(warn_only=True):
+        run('mysqld_safe &')
+    run('mysql -u root -e "CREATE DATABASE redmine CHARACTER SET utf8;"')
+    run('mysql -u root -e "CREATE USER \'redmine\'@\'localhost\' IDENTIFIED BY \'password_123\';"')
+    run('mysql -u root -e "GRANT ALL PRIVILEGES ON redmine.* TO \'redmine\'@\'localhost\';"')
+    env.REDMINE = 'redmine-2.3.3'
+    if not exists('{packages_cache}/{REDMINE}.tar.gz'.format(**env)):
+        run('wget http://rubyforge.org/frs/download.php/77138/{REDMINE}.tar.gz -P {packages_cache}'.format(**env))
+    with cd('{base}/var/www/'.format(**env)):
+        run('tar -xzf {packages_cache}/{REDMINE}.tar.gz'.format(**env))
+        with cd(env.REDMINE):
+            run('cp config/database.yml.example config/database.yml')
+            run('echo \'production:\' >> config/database.yml')
+            run('echo \'  adapter: mysql2\' >> config/database.yml')
+            run('echo \'  database: redmine\' >> config/database.yml')
+            run('echo \'  host: localhost\' >> config/database.yml')
+            run('echo \'  port: {MYSQL_PORT}\' >> config/database.yml'.format(**env))
+            run('echo \'  username: redmine\' >> config/database.yml')
+            run('echo \'  password: password_123\' >> config/database.yml')
+            run('PKG_CONFIG_PATH={base}/lib/pkgconfig/:$PKG_CONFIG_PATH '
+                'bundle install --without development test'
+                ''.format(**env))
+            run('rake generate_secret_token')
+            run('RAILS_ENV=production rake db:migrate')
+            run('RAILS_ENV=production REDMINE_LANG=en rake redmine:load_default_data')
+    if not gem_installed('passenger'):
+        run('gem install passenger')
+    execute(curl)
+    run('passenger-install-apache2-module')
+    httpd_conf = ("""
+                    ServerRoot "/opt/cv_instances/cv6"
+                    Listen {http_port}
+
+                    ServerAdmin you@example.com
+                    ServerName 10.11.40.173:{http_port}
+
+                    DocumentRoot "{base}/var/www/{REDMINE}/public"
+                    <Directory />
+                        Options FollowSymLinks
+                        AllowOverride None
+                        Order deny,allow
+                        Deny from all
+                    </Directory>
+                    <Directory "{base}/var/www/{REDMINE}/public">
+                        Options Indexes FollowSymLinks
+                        AllowOverride None
+                        Order allow,deny
+                        Allow from all
+                    </Directory>
+
+                    <IfModule dir_module>
+                        DirectoryIndex index.html
+                    </IfModule>
+
+                    <FilesMatch "^\.ht">
+                        Order allow,deny
+                        Deny from all
+                        Satisfy All
+                    </FilesMatch>
+
+                    ErrorLog "var/run/logs/error_log"
+                    LogLevel warn
+
+                    <IfModule log_config_module>
+                        LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+                        LogFormat "%h %l %u %t \"%r\" %>s %b" common
+
+                        <IfModule logio_module>
+                          LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
+                        </IfModule>
+
+                        CustomLog "var/run/logs/access_log" common
+                        #CustomLog "var/run/logs/access_log" combined
+                    </IfModule>
+
+                    <IfModule alias_module>
+                        ScriptAlias /cgi-bin/ "{base}/var/www/cgi-bin/"
+                    </IfModule>
+
+                    <Directory "{base}/var/www/cgi-bin">
+                        AllowOverride None
+                        Options None
+                        Order allow,deny
+                        Allow from all
+                    </Directory>
+
+                    DefaultType text/plain
+
+                    <IfModule mime_module>
+                        TypesConfig etc/httpd/conf/mime.types
+                    </IfModule>
+
+
+                    # Secure (SSL/TLS) connections
+                    #Include etc/httpd/conf/extra/httpd-ssl.conf
+                    #
+                    # Note: The following must must be present to support
+                    #       starting without SSL on platforms with no /dev/random equivalent
+                    #       but a statically compiled-in mod_ssl.
+                    #
+                    <IfModule ssl_module>
+                    SSLRandomSeed startup builtin
+                    SSLRandomSeed connect builtin
+                    </IfModule>
+
+                    LoadModule passenger_module {base}/lib/ruby/gems/2.0.0/gems/passenger-4.0.19/buildout/apache2/mod_passenger.so
+                    PassengerRoot {base}/lib/ruby/gems/2.0.0/gems/passenger-4.0.19
+                    PassengerDefaultRuby {base}/bin/ruby
+                  """).format(**env)
+    with cd('{base}/etc/httpd/conf/'.format(base=env.base, http_port=http_port)):
+        run('rm httpd.conf')
+        run('echo \'{}\' > httpd.conf'.format(httpd_conf))
+    run('apachectl restart')
+
 
 @task
 def apache():
