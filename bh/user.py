@@ -23,6 +23,16 @@ def init_home_env(base_port):
     bin_utils(env.http_port)
     chown()
 
+    run('mkdir -p ~/.ssh')
+
+    # setup SSH (generate key for instance, create .ssh dir with
+        # 4 -rw-r--r--  1 cv5 cv 1834 Oct 14 15:20 authorized_keys
+        # 4 drwx------  2 cv5 cv 4096 Oct 14 15:19 .
+        # 4 drwxr-xr-x 14 cv5 cv 4096 Oct 14 15:18 ..
+        # 4 -rw-------  1 cv5 cv 1675 Oct 14 15:08 id_rsa
+        # 4 -rw-------  1 cv5 cv  398 Oct 14 14:58 id_rsa.pub
+
+
 @task(alias='bin')
 def bin_utils(port=None):
     """copy user utilities to $HOME/bin directory"""

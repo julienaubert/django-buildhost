@@ -76,42 +76,42 @@ def mysql():
     compile and install mysql
     """
     setup_env_for_user(env.user)
-    # if bin_installed('mysql'):
-    #     print "mysql already installed"
-    #     return
-    # if not bin_installed('cmake'):
-    #     execute(cmake)
-    # run('mkdir -p {admin_home_dir}/~build'.format(**env))
-    # env.MYSQL = 'mysql-5.7.2-m12'
-    # with cd(env.build):
-    #     if not exists('{packages_cache}/{MYSQL}.tar.gz'.format(**env)):
-    #         run('wget http://mysql.mirror.facebook.net/MySQL-5.7/{MYSQL}.tar.gz -P {packages_cache}'.format(**env))
-    #     run('tar -xzf {packages_cache}/{MYSQL}.tar.gz'.format(**env))
-    #     with cd(env.MYSQL):
-    #         run('mkdir -p {base}/var/lib')
-    #         run('cmake '
-    #             ' -DCMAKE_INSTALL_PREFIX={base}'
-    #             ' -DMYSQL_UNIX_ADDR={base}/tmp/mysql.sock'
-    #             ' -DMYSQL_DATADIR={base}/var/lib/mysql'
-    #             ' .'
-    #             ''.format(**env))
-    #         run('make clean')
-    #         run('make')
-    #         run('make install')
-    #     run('rm -fr {MYSQL}'.format(**env))
-    # if bin_installed('ruby'):
-    #     run('gem install mysql2')
-    # run('{base}/scripts/mysql_install_db '
-    #     ' --user={user} '
-    #     ' --random-passwords'
-    #     ' --force'
-    #     ' --basedir={base}'
-    #     ' --skip-name-resolve'
-    #     ''.format(**env))
-    # run('echo \'basedir={base}\' >> {base}/my.cnf'.format(**env))
-    # run('echo \'datadir={base}/var/lib/mysql\' >> {base}/my.cnf'.format(**env))
+    if bin_installed('mysql'):
+        print "mysql already installed"
+        return
+    if not bin_installed('cmake'):
+        execute(cmake)
+    run('mkdir -p {admin_home_dir}/~build'.format(**env))
+    env.MYSQL = 'mysql-5.7.2-m12'
+    with cd(env.build):
+        if not exists('{packages_cache}/{MYSQL}.tar.gz'.format(**env)):
+            run('wget http://mysql.mirror.facebook.net/MySQL-5.7/{MYSQL}.tar.gz -P {packages_cache}'.format(**env))
+        run('tar -xzf {packages_cache}/{MYSQL}.tar.gz'.format(**env))
+        with cd(env.MYSQL):
+            run('mkdir -p {base}/var/lib')
+            run('cmake '
+                ' -DCMAKE_INSTALL_PREFIX={base}'
+                ' -DMYSQL_UNIX_ADDR={base}/tmp/mysql.sock'
+                ' -DMYSQL_DATADIR={base}/var/lib/mysql'
+                ' .'
+                ''.format(**env))
+            run('make clean')
+            run('make')
+            run('make install')
+        run('rm -fr {MYSQL}'.format(**env))
+    if bin_installed('ruby'):
+        run('gem install mysql2')
+    run('{base}/scripts/mysql_install_db '
+        ' --user={user} '
+        ' --random-passwords'
+        ' --force'
+        ' --basedir={base}'
+        ' --skip-name-resolve'
+        ''.format(**env))
+    run('echo \'basedir={base}\' >> {base}/my.cnf'.format(**env))
+    run('echo \'datadir={base}/var/lib/mysql\' >> {base}/my.cnf'.format(**env))
     run('echo \'port={env.MYSQL_PORT}\' >> {base}/my.cnf'.format(**env))
-#    run('cd {base}/mysql-test ; perl mysql-test-run.pl'.format(**env))
+    run('cd {base}/mysql-test ; perl mysql-test-run.pl'.format(**env))
 
 
 @task
